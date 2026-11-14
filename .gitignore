@@ -1,4 +1,30 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Vite cache and temporary config files
+.vite/
+vite.config.js.timestamp-*
+
+# Local environment files (commit a .env.example instead)
+.env
+.env.*
+!.env.example
 *.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# OS files
 .DS_Store
+Thumbs.db
+Desktop.ini
