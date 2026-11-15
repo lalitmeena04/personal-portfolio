@@ -4,6 +4,9 @@ node_modules/
 # Build output
 dist/
 
+# Local copies of older code
+backup/
+
 # Vite cache and temporary config files
 .vite/
 vite.config.js.timestamp-*

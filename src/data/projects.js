@@ -73,6 +73,28 @@ export const projects = [
     pushedAt: '2023-09-03',
     links: [{ label: 'Source', href: repoUrl('leet') }],
   },
+  {
+    repo: 'workflow-analyzer',
+    title: 'Workflow Analyzer',
+    kind: 'Side quest · Web + NLP',
+    tagline: "Project tracker that turns a team's Outlook mail into live progress charts.",
+    description: 'Built in 2019 as a college minor project by a team of five, restored and published in 2026.',
+    highlights: [
+      'PHP and Bootstrap dashboard with Vue 2 and ApexCharts progress reports.',
+      'Flask consent flow and a Microsoft Graph pipeline that fetches project mail and calendar events.',
+      'NLTK VADER sentiment and spaCy date extraction turn e-mails into per-module progress.',
+    ],
+    languages: [
+      ['JavaScript', 342196],
+      ['Python', 41246],
+      ['PHP', 35887],
+      ['CSS', 15422],
+      ['HTML', 4426],
+    ],
+    stars: 0,
+    pushedAt: '2026-11-15',
+    links: [{ label: 'Source', href: repoUrl('workflow-analyzer') }],
+  },
 ]
 
 export const forks = [
@@ -87,6 +109,7 @@ export const languageColors = {
   'C++': '#f34b7d',
   QML: '#44a51c',
   Python: '#3572a5',
+  PHP: '#4f5d95',
   PowerShell: '#5391fe',
   CMake: '#da3434',
   JavaScript: '#f1e05a',

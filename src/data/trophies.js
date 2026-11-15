@@ -1,6 +1,12 @@
 export const trophies = [
   {
     tier: 'gold',
+    title: 'Spot Recognition',
+    source: 'Delta IoT Solutions · September 2026',
+    detail: 'Spot award recognising my contributions at Delta IoT.',
+  },
+  {
+    tier: 'gold',
     title: 'Star of the Month',
     source: 'TATA Advanced Systems · June 2022',
     detail: 'Recognised for leading a successful HMI overhaul that delivered 80% performance improvements.',
