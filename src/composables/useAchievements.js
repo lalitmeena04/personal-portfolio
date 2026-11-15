@@ -8,7 +8,9 @@ export const achievements = [
   { id: 'juggle', title: 'Keepy-Uppy', hint: 'Juggle the football 10 times.' },
   { id: 'power', title: 'Over 9000', hint: 'Charge the power level past 9000.' },
   { id: 'manga', title: 'Bookworm', hint: 'Read the four-panel strip to the end.' },
-  { id: 'konami', title: 'Cheat Code', hint: '↑ ↑ ↓ ↓ ← → ← → B A' },
+  { id: 'wheelie', title: 'One Wheel Wonder', hint: 'Hold a wheelie in the zone for 5 seconds.' },
+  { id: 'launch', title: 'Lights Out', hint: 'React to the start lights within 0.35 seconds.' },
+  { id: 'konami', title: 'Cheat Code', hint: '↑ ↑ ↓ ↓ ← → ← → B A. On touch, swipe it and tap twice.' },
   { id: 'credits', title: 'Roll Credits', hint: 'Reach the end of the page.' },
 ]
 

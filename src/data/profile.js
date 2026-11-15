@@ -14,17 +14,18 @@ export const profile = {
   careerStart: '2021-10',
   domains: ['Infrastructure engineering software', 'Digital twins'],
   education: 'B.E. Computer Science & Engineering, RGPV Bhopal · 2020',
-  hobbies: ['Gaming', 'Football', 'Chess', 'Anime', 'Manga'],
+  hobbies: ['Gaming', 'Football', 'Chess', 'Anime', 'Manga', 'Bikes', 'Cars'],
   favouriteGames: [
     'NFS Most Wanted (2005)',
     'FIFA',
-    'Valorant',
-    'Fortnite',
     'Apex Legends',
     "Assassin's Creed",
     'GTA',
+    'Valorant',
+    'Fortnite',
     'Call of Duty',
     'Battlefield',
+    'God of War',
   ],
 }
 

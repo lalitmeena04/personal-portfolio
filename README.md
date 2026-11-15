@@ -43,7 +43,7 @@ The projects section refreshes star counts and "updated" dates from the public G
 src/
   App.vue                 page shell, Konami code
   components/             one component per section, plus shared pieces
-  components/hobbies/     the five mini-games
+  components/hobbies/     the seven mini-games
   three/drive.js          Three.js night drive for the hero (loaded lazily)
   data/                   content
   styles/base.css         design tokens and shared classes

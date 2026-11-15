@@ -6,6 +6,8 @@ import KeepyUppy from './hobbies/KeepyUppy.vue'
 import MangaStrip from './hobbies/MangaStrip.vue'
 import PowerUp from './hobbies/PowerUp.vue'
 import SnakeGame from './hobbies/SnakeGame.vue'
+import StartLights from './hobbies/StartLights.vue'
+import Wheelie from './hobbies/Wheelie.vue'
 
 // chess.js is only needed here, so it ships in its own chunk.
 const ChessPuzzle = defineAsyncComponent(() => import('./hobbies/ChessPuzzle.vue'))
@@ -70,6 +72,24 @@ const ChessPuzzle = defineAsyncComponent(() => import('./hobbies/ChessPuzzle.vue
           </header>
           <MangaStrip />
         </article>
+
+        <article v-reveal class="panel hobby hobby--half">
+          <header>
+            <p class="pixel">Hobby 06</p>
+            <h3>Bikes</h3>
+            <p>Hold the throttle to lift the front wheel, then feather it. Five seconds in the zone earns a trophy.</p>
+          </header>
+          <Wheelie />
+        </article>
+
+        <article v-reveal="80" class="panel hobby hobby--half">
+          <header>
+            <p class="pixel">Hobby 07</p>
+            <h3>Cars</h3>
+            <p>Five red lights, then none. Launch the moment they go out. Under 0.35 seconds earns a trophy.</p>
+          </header>
+          <StartLights />
+        </article>
       </div>
     </div>
   </section>
@@ -95,6 +115,10 @@ const ChessPuzzle = defineAsyncComponent(() => import('./hobbies/ChessPuzzle.vue
 
 .hobby--chess {
   grid-column: span 5;
+}
+
+.hobby--half {
+  grid-column: span 6;
 }
 
 .hobby header {

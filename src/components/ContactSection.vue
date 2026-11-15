@@ -89,7 +89,9 @@ onBeforeUnmount(() => {
 
     <footer ref="end" class="wrap credits">
       <p>© {{ new Date().getFullYear() }} {{ profile.name }}. Built with Vue 3, Three.js and hand-written CSS.</p>
-      <p class="credits__code">Psst: <kbd>↑ ↑ ↓ ↓ ← → ← → B A</kbd></p>
+      <p class="credits__code">
+        Psst: <kbd>↑ ↑ ↓ ↓ ← → ← → B A</kbd><span class="credits__touch"> (swipe it, then tap twice)</span>
+      </p>
     </footer>
   </section>
 </template>
@@ -192,6 +194,17 @@ onBeforeUnmount(() => {
 .credits kbd {
   font: 500 0.85rem var(--font-mono);
   letter-spacing: 0.1em;
+}
+
+/* Only worth saying where there is a touch screen to swipe on. */
+.credits__touch {
+  display: none;
+}
+
+@media (any-pointer: coarse) {
+  .credits__touch {
+    display: inline;
+  }
 }
 
 @media (max-width: 760px) {
