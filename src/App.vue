@@ -8,6 +8,7 @@ import QuestLog from './components/QuestLog.vue'
 import SkillTree from './components/SkillTree.vue'
 import SideQuests from './components/SideQuests.vue'
 import TrophyRoom from './components/TrophyRoom.vue'
+import FreeRoam from './components/FreeRoam.vue'
 import ContactSection from './components/ContactSection.vue'
 import AchievementToasts from './components/AchievementToasts.vue'
 
@@ -38,6 +39,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
     <SkillTree />
     <SideQuests />
     <TrophyRoom />
+    <FreeRoam />
     <ContactSection />
   </main>
   <AchievementToasts />
