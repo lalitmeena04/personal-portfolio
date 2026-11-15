@@ -52,3 +52,5 @@ src/
 ## Deploying
 
 `npm run build` produces a static site in `dist/`. The build uses relative asset paths (`base: './'` in `vite.config.js`), so the same output works on a custom domain and under a sub-path such as `https://lalitmeena04.github.io/personal-portfolio/`.
+
+Pushes to `main` are built and published to GitHub Pages by `.github/workflows/deploy.yml`. This needs the repository's Pages source (Settings → Pages) set to **GitHub Actions**; "Deploy from a branch" would serve the unbuilt source and show a blank page.
