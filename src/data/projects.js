@@ -29,7 +29,13 @@ export const projects = [
     pushedAt: '2026-11-12',
     links: [
       { label: 'Source', href: repoUrl('MediaFlyouts') },
-      { label: 'Download', href: 'https://lalitmeena04.github.io/MediaFlyouts-Releases/' },
+      {
+        label: 'Download',
+        options: [
+          { label: 'GitHub release', href: `${repoUrl('MediaFlyouts-Releases')}/releases/latest` },
+          { label: 'Microsoft Store', href: 'https://apps.microsoft.com/detail/9pkz5nqk82xr' },
+        ],
+      },
     ],
   },
   {

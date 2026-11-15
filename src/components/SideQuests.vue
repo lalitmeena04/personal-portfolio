@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { forks as seedForks, hiddenRepos, languageColors, projects as seedProjects } from '../data/projects'
 import { profile } from '../data/profile'
 import AppIcon from './AppIcon.vue'
+import LinkMenu from './LinkMenu.vue'
 import SectionHeading from './SectionHeading.vue'
 
 const MAX_LANGUAGES = 4
@@ -131,17 +132,19 @@ onMounted(() => {
               </ul>
             </div>
             <div class="quest__links">
-              <a
-                v-for="(link, i) in project.links"
-                :key="link.href"
-                class="btn btn--sm"
-                :class="{ 'btn--primary': i === 0 }"
-                :href="link.href"
-                target="_blank"
-                rel="noopener"
-              >
-                <AppIcon :name="i === 0 ? 'github' : 'external'" /> {{ link.label }}
-              </a>
+              <template v-for="(link, i) in project.links" :key="link.label">
+                <LinkMenu v-if="link.options" :label="link.label" :options="link.options" />
+                <a
+                  v-else
+                  class="btn btn--sm"
+                  :class="{ 'btn--primary': i === 0 }"
+                  :href="link.href"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <AppIcon :name="i === 0 ? 'github' : 'external'" /> {{ link.label }}
+                </a>
+              </template>
             </div>
           </footer>
         </article>

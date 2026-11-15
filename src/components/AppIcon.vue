@@ -15,6 +15,8 @@ const ICONS = {
   phone: { body: '<rect x="7" y="2.5" width="10" height="19" rx="1.5"/><path d="M11 18h2"/>' },
   star: { body: '<path d="M12 3.5 14.6 9l6 .7-4.4 4.2 1.2 6L12 17l-5.4 2.9 1.2-6L3.4 9.7l6-.7z"/>' },
   external: { body: '<path d="M7 17 17 7M9 7h8v8"/>' },
+  download: { body: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>' },
+  chevron: { body: '<path d="m6 9 6 6 6-6"/>' },
   copy: {
     body: '<rect x="8" y="8" width="12" height="12" rx="1"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',
   },
