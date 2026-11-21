@@ -5,6 +5,9 @@ import { profile } from '../data/profile'
 import AppIcon, { type IconName } from './AppIcon.vue'
 import SectionHeading from './SectionHeading.vue'
 
+const VISITOR_COUNTER_URL =
+  'https://api.visitorbadge.io/api/VisitorHit?user=lalitmeena04&repo=personal-portfolio&label=COUNT&labelColor=%2311151d&countColor=%23c4f542&style=flat-square'
+
 interface Channel {
   id: string
   icon: IconName
@@ -115,7 +118,18 @@ onBeforeUnmount(() => {
     </div>
 
     <footer ref="end" class="wrap credits">
-      <p>© {{ new Date().getFullYear() }} {{ profile.name }}. Built with Vue 3, Three.js and hand-written CSS.</p>
+      <p class="credits__visits">
+        <span class="pixel credits__visits-label">NPC Visits</span>
+        <img
+          :src="VISITOR_COUNTER_URL"
+          alt="Total portfolio visits"
+          title="NPC visits, provided by Visitor Badge"
+          referrerpolicy="no-referrer"
+        />
+      </p>
+      <p class="credits__copyright">
+        © {{ new Date().getFullYear() }} {{ profile.name }}. Built with Vue 3, Three.js and hand-written CSS.
+      </p>
       <p class="credits__code">
         Psst: <kbd>↑ ↑ ↓ ↓ ← → ← → B A</kbd><span class="credits__touch"> (swipe it, then tap twice)</span>
       </p>
@@ -203,9 +217,10 @@ onBeforeUnmount(() => {
 }
 
 .credits {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-areas: 'visits copyright code';
+  align-items: center;
   gap: 8px 24px;
   margin-top: clamp(56px, 8vw, 96px);
   padding-block: 24px;
@@ -216,6 +231,38 @@ onBeforeUnmount(() => {
 
 .credits p {
   margin: 0;
+}
+
+.credits__visits {
+  grid-area: visits;
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 9px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--accent);
+}
+
+.credits__visits-label {
+  color: var(--muted);
+}
+
+.credits__visits img {
+  width: auto;
+  height: 20px;
+}
+
+.credits__copyright {
+  grid-area: copyright;
+  text-align: center;
+}
+
+.credits__code {
+  grid-area: code;
+  justify-self: end;
+  text-align: right;
 }
 
 .credits kbd {
@@ -234,6 +281,16 @@ onBeforeUnmount(() => {
   }
 }
 
+@media (max-width: 1080px) {
+  .credits {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      'visits code'
+      'copyright copyright';
+    gap: 14px 12px;
+  }
+}
+
 @media (max-width: 760px) {
   .channels {
     grid-template-columns: minmax(0, 1fr);
@@ -242,6 +299,25 @@ onBeforeUnmount(() => {
 
 /* Keep the email address on one line on phones: tighter spacing and an icon-only copy button. */
 @media (max-width: 480px) {
+  .credits {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'visits'
+      'copyright'
+      'code';
+    justify-items: center;
+    text-align: center;
+  }
+
+  .credits__visits {
+    justify-self: start;
+  }
+
+  .credits__code {
+    justify-self: center;
+    text-align: center;
+  }
+
   .channel__link {
     gap: 12px;
     padding: 16px;

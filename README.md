@@ -67,3 +67,5 @@ Unit tests sit next to the code they cover as `*.test.ts`.
 `npm run build` produces a static site in `dist/`. The build uses relative asset paths (`base: './'` in `vite.config.ts`), so the same output works on a custom domain and under a sub-path such as `https://lalitmeena04.github.io/personal-portfolio/`.
 
 Pushes to `main` are checked, built and published to GitHub Pages by `.github/workflows/deploy.yml`; a failing check stops the deploy. Pull requests get the same checks from `.github/workflows/ci.yml`. Publishing needs the repository's Pages source (Settings → Pages) set to **GitHub Actions**; "Deploy from a branch" would serve the unbuilt source and show a blank page.
+
+The footer's global visit badge is provided by [Visitor Badge](https://visitorbadge.io). It counts badge requests across visitors and requires the hosted service to be available; requests are made from the browser, with no API key or backend required.
