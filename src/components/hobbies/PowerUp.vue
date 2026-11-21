@@ -1,6 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { unlock } from '../../composables/useAchievements'
+import { holdListeners } from '../../utils/hold'
 
 const TARGET = 9000
 const SECONDS_TO_TARGET = 3.4
@@ -14,8 +15,9 @@ let last = 0
 
 const over = computed(() => power.value > TARGET)
 const ratio = computed(() => Math.min(1, power.value / TARGET))
+const hold = holdListeners(start, stop)
 
-function step(now) {
+function step(now: number) {
   const dt = Math.min(0.05, (now - last) / 1000)
   last = now
   held = charging.value ? Math.min(MAX_SECONDS, held + dt) : Math.max(0, held - dt * 3)
@@ -37,12 +39,6 @@ function stop() {
   charging.value = false
 }
 
-function onKeydown(event) {
-  if (event.repeat || (event.key !== ' ' && event.key !== 'Enter')) return
-  event.preventDefault()
-  start()
-}
-
 onBeforeUnmount(() => cancelAnimationFrame(raf))
 </script>
 
@@ -53,22 +49,11 @@ onBeforeUnmount(() => cancelAnimationFrame(raf))
       <span class="power__aura"></span>
       <span class="power__core"></span>
     </div>
-    <p class="power__readout">
+    <p class="readout power__readout">
       <span>Power level</span>
       <output>{{ power.toLocaleString('en') }}</output>
     </p>
-    <button
-      type="button"
-      class="btn power__button"
-      @pointerdown="start"
-      @pointerup="stop"
-      @pointerleave="stop"
-      @pointercancel="stop"
-      @keydown="onKeydown"
-      @keyup="stop"
-      @blur="stop"
-      @contextmenu.prevent
-    >
+    <button type="button" class="btn power__button" v-on="hold">
       {{ over ? "It's over 9000!" : 'Hold to power up' }}
     </button>
   </div>
@@ -93,7 +78,7 @@ onBeforeUnmount(() => cancelAnimationFrame(raf))
   height: 150px;
   overflow: hidden;
   border: 1px solid var(--line-2);
-  background: #0b0e15;
+  background: var(--stage);
 }
 
 .power__aura,
@@ -156,10 +141,6 @@ onBeforeUnmount(() => cancelAnimationFrame(raf))
   justify-content: space-between;
   align-items: baseline;
   margin: 0;
-  color: var(--muted);
-  font: 500 0.8rem/1.5 var(--font-display);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .power__readout output {

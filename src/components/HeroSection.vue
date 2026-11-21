@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { level, profile } from '../data/profile'
 import { unlock } from '../composables/useAchievements'
 import AppIcon from './AppIcon.vue'
@@ -21,14 +21,18 @@ import DriveScene from './DriveScene.vue'
           defence consoles and embedded displays. Gamer the rest of the time.
         </p>
         <div class="hero__cta">
-          <a class="btn btn--primary" href="#profile" @click="unlock('start')"><span aria-hidden="true">▶</span> Press Start</a>
+          <a class="btn btn--primary" href="#profile" @click="unlock('start')"
+            ><span aria-hidden="true">▶</span> Press Start</a
+          >
           <a class="btn" :href="profile.github" target="_blank" rel="noopener"><AppIcon name="github" /> GitHub</a>
-          <a class="btn" :href="profile.linkedin" target="_blank" rel="noopener"><AppIcon name="linkedin" /> LinkedIn</a>
+          <a class="btn" :href="profile.linkedin" target="_blank" rel="noopener"
+            ><AppIcon name="linkedin" /> LinkedIn</a
+          >
         </div>
         <dl class="hero__meta">
           <div>
             <dt>Class</dt>
-            <dd>C++ / Qt Engineer</dd>
+            <dd>{{ profile.playerClass }}</dd>
           </div>
           <div>
             <dt>Level</dt>
@@ -36,7 +40,7 @@ import DriveScene from './DriveScene.vue'
           </div>
           <div>
             <dt>Region</dt>
-            <dd>Pune, IN</dd>
+            <dd>{{ profile.locationShort }}</dd>
           </div>
         </dl>
       </div>

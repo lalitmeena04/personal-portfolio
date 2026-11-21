@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { achievements, resetAchievements, unlocked } from '../composables/useAchievements'
 import { trophies } from '../data/trophies'
 import PixelSprite from './PixelSprite.vue'
@@ -26,7 +26,13 @@ const CUP = [
       </SectionHeading>
 
       <ul class="cabinet">
-        <li v-for="(trophy, i) in trophies" :key="trophy.title" v-reveal="i * 60" class="trophy" :class="`trophy--${trophy.tier}`">
+        <li
+          v-for="(trophy, i) in trophies"
+          :key="trophy.title"
+          v-reveal="i * 60"
+          class="trophy"
+          :class="`trophy--${trophy.tier}`"
+        >
           <PixelSprite class="trophy__cup" :rows="CUP" />
           <div>
             <p class="trophy__tier">{{ trophy.tier }}</p>
@@ -125,7 +131,7 @@ const CUP = [
 
 .trophy__detail {
   margin: 8px 0 0;
-  color: #c9d0de;
+  color: var(--text-soft);
   font-size: 0.93rem;
   line-height: 1.5;
 }

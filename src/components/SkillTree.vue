@@ -1,16 +1,17 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
-import { allSkills, skillGroups } from '../data/skills'
+import { allSkills, skillGroups, type SkillUse } from '../data/skills'
 import { scrollToId, selectedQuest, selectedSkill } from '../store'
 import SectionHeading from './SectionHeading.vue'
 
 const current = computed(() => allSkills.find((skill) => skill.id === selectedSkill.value) ?? allSkills[0])
 
-function select(id) {
+function select(id: string) {
   selectedSkill.value = id
 }
 
-function jump(use) {
+function jump(use: SkillUse) {
+  if (use.kind === 'note') return
   if (use.kind === 'quest') {
     selectedQuest.value = use.id
     scrollToId('quests')
@@ -151,7 +152,7 @@ function jump(use) {
 
 .tree__blurb {
   margin: 12px 0 0;
-  color: #c9d0de;
+  color: var(--text-soft);
 }
 
 .tree__label {

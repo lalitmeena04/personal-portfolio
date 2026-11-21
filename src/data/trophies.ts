@@ -1,4 +1,11 @@
-export const trophies = [
+export interface Trophy {
+  tier: 'gold' | 'silver' | 'bronze'
+  title: string
+  source: string
+  detail: string
+}
+
+export const trophies: Trophy[] = [
   {
     tier: 'gold',
     title: 'Spot Recognition',

@@ -1,5 +1,16 @@
 import { reactive, ref } from 'vue'
 
+interface Achievement {
+  id: string
+  title: string
+  hint: string
+}
+
+interface Toast {
+  key: number
+  title: string
+}
+
 export const achievements = [
   { id: 'start', title: 'Press Start', hint: 'Begin the tour from the title screen.' },
   { id: 'drive', title: 'Most Wanted', hint: 'Take the wheel on the night drive and grab a skill.' },
@@ -12,15 +23,20 @@ export const achievements = [
   { id: 'launch', title: 'Lights Out', hint: 'React to the start lights within 0.35 seconds.' },
   { id: 'konami', title: 'Cheat Code', hint: '↑ ↑ ↓ ↓ ← → ← → B A. On touch, swipe it and tap twice.' },
   { id: 'credits', title: 'Roll Credits', hint: 'Reach the end of the page.' },
-]
+] as const satisfies readonly Achievement[]
+
+export type AchievementId = (typeof achievements)[number]['id']
 
 const STORAGE_KEY = 'lkm:achievements'
 const TOAST_MS = 4200
 
-function load() {
+const isAchievementId = (value: unknown): value is AchievementId => achievements.some((item) => item.id === value)
+
+function load(): AchievementId[] {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY))
-    return Array.isArray(saved) ? saved : []
+    const saved: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
+    // Ignore anything that is not a current achievement, such as one that has since been removed.
+    return Array.isArray(saved) ? saved.filter(isAchievementId) : []
   } catch {
     return []
   }
@@ -34,11 +50,11 @@ function save() {
   }
 }
 
-export const unlocked = reactive(new Set(load()))
-export const toasts = ref([])
+export const unlocked = reactive(new Set<AchievementId>(load()))
+export const toasts = ref<Toast[]>([])
 let toastKey = 0
 
-export function unlock(id) {
+export function unlock(id: AchievementId) {
   const achievement = achievements.find((item) => item.id === id)
   if (!achievement || unlocked.has(id)) return
   unlocked.add(id)

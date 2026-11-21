@@ -1,8 +1,39 @@
-const repoUrl = (name) => `https://github.com/lalitmeena04/${name}`
+export interface LinkOption {
+  label: string
+  href: string
+}
+
+/** A plain link, or (with `options` instead of `href`) a menu of links. */
+export type ProjectLink = LinkOption | { label: string; options: LinkOption[] }
+
+export interface Project {
+  /** Repository name on GitHub. */
+  repo: string
+  title: string
+  kind: string
+  featured?: boolean
+  tagline: string
+  description: string
+  highlights: string[]
+  /** [language, bytes] pairs, largest first. */
+  languages: [name: string, bytes: number][]
+  stars: number
+  /** ISO date. */
+  pushedAt: string
+  links: ProjectLink[]
+}
+
+export interface Fork {
+  name: string
+  description: string
+  href: string
+}
+
+const repoUrl = (name: string) => `https://github.com/lalitmeena04/${name}`
 
 // Curated copy for the main repositories. Stars and "updated" dates are refreshed live from the
 // GitHub API when it is reachable; the values here are the fallback snapshot.
-export const projects = [
+export const projects: Project[] = [
   {
     repo: 'MediaFlyouts',
     title: 'MediaFlyouts',
@@ -103,15 +134,23 @@ export const projects = [
   },
 ]
 
-export const forks = [
-  { name: 'rea', description: 'Reverse engineer anything with agents, from app behavior down to native binaries.', href: repoUrl('rea') },
-  { name: 'gods-eye-view', description: 'Live open-source spatial intelligence on a photorealistic 3D globe.', href: repoUrl('gods-eye-view') },
+export const forks: Fork[] = [
+  {
+    name: 'rea',
+    description: 'Reverse engineer anything with agents, from app behavior down to native binaries.',
+    href: repoUrl('rea'),
+  },
+  {
+    name: 'gods-eye-view',
+    description: 'Live open-source spatial intelligence on a photorealistic 3D globe.',
+    href: repoUrl('gods-eye-view'),
+  },
 ]
 
 // Repositories that should not appear as their own card.
 export const hiddenRepos = ['personal-portfolio', 'MediaFlyouts-Releases', 'lalitmeena04']
 
-export const languageColors = {
+export const languageColors: Record<string, string> & { Other: string } = {
   'C++': '#f34b7d',
   QML: '#44a51c',
   Python: '#3572a5',

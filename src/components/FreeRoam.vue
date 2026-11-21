@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
 import { profile } from '../data/profile'
 import SectionHeading from './SectionHeading.vue'
@@ -7,7 +7,7 @@ import MangaStrip from './hobbies/MangaStrip.vue'
 import PowerUp from './hobbies/PowerUp.vue'
 import SnakeGame from './hobbies/SnakeGame.vue'
 import StartLights from './hobbies/StartLights.vue'
-import Wheelie from './hobbies/Wheelie.vue'
+import WheelieGame from './hobbies/WheelieGame.vue'
 
 // chess.js is only needed here, so it ships in its own chunk.
 const ChessPuzzle = defineAsyncComponent(() => import('./hobbies/ChessPuzzle.vue'))
@@ -26,8 +26,8 @@ const ChessPuzzle = defineAsyncComponent(() => import('./hobbies/ChessPuzzle.vue
             <p class="pixel">Hobby 01</p>
             <h3>Gaming</h3>
             <p>
-              Video games are why this portfolio looks the way it does. Here is the one everybody has played: Snake,
-              the way it ran on a Nokia.
+              Video games are why this portfolio looks the way it does. Here is the one everybody has played: Snake, the
+              way it ran on a Nokia.
             </p>
             <ul class="games" aria-label="Favourite games">
               <li v-for="game in profile.favouriteGames" :key="game" class="chip">{{ game }}</li>
@@ -79,7 +79,7 @@ const ChessPuzzle = defineAsyncComponent(() => import('./hobbies/ChessPuzzle.vue
             <h3>Bikes</h3>
             <p>Hold the throttle to lift the front wheel, then feather it. Five seconds in the zone earns a trophy.</p>
           </header>
-          <Wheelie />
+          <WheelieGame />
         </article>
 
         <article v-reveal="80" class="panel hobby hobby--half">

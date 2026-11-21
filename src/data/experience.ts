@@ -1,5 +1,26 @@
-// Newest first. `start` / `end` are 'YYYY-MM'; `end: null` marks the current role.
-export const quests = [
+export interface Rank {
+  title: string
+  period: string
+  objectives: string[]
+}
+
+export interface Quest {
+  id: string
+  company: string
+  location: string
+  /** 'YYYY-MM' */
+  start: string
+  /** 'YYYY-MM', or null for the current role. */
+  end: string | null
+  period: string
+  brief: string
+  /** Newest first. */
+  ranks: [Rank, ...Rank[]]
+  loot: string[]
+}
+
+// Newest first.
+export const quests: [Quest, ...Quest[]] = [
   {
     id: 'bentley',
     company: 'Bentley Systems',

@@ -1,26 +1,30 @@
-<script setup>
+<script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, useId } from 'vue'
+import type { LinkOption } from '../data/projects'
 import AppIcon from './AppIcon.vue'
 
-defineProps({
-  label: { type: String, required: true },
-  options: { type: Array, required: true },
-})
+defineProps<{
+  label: string
+  options: LinkOption[]
+}>()
 
 const EDGE_PX = 12
 
-const root = ref(null)
-const toggle = ref(null)
-const list = ref(null)
+const root = ref<HTMLElement | null>(null)
+const toggle = ref<HTMLButtonElement | null>(null)
+const list = ref<HTMLElement | null>(null)
 const open = ref(false)
 const shift = ref(0)
 const listId = useId()
+
+const isInside = (target: EventTarget | null) => target instanceof Node && Boolean(root.value?.contains(target))
 
 async function show() {
   shift.value = 0
   open.value = true
   document.addEventListener('pointerdown', onPointerOutside)
   await nextTick()
+  if (!list.value) return
   // On a narrow screen the button can sit near the right edge; slide the list back so it stays on screen.
   const overflow = list.value.getBoundingClientRect().right - (document.documentElement.clientWidth - EDGE_PX)
   shift.value = Math.max(0, overflow)
@@ -31,18 +35,18 @@ function hide() {
   document.removeEventListener('pointerdown', onPointerOutside)
 }
 
-function onPointerOutside(event) {
-  if (!root.value.contains(event.target)) hide()
+function onPointerOutside(event: PointerEvent) {
+  if (!isInside(event.target)) hide()
 }
 
-function onFocusOut(event) {
-  if (event.relatedTarget && !root.value.contains(event.relatedTarget)) hide()
+function onFocusOut(event: FocusEvent) {
+  if (event.relatedTarget && !isInside(event.relatedTarget)) hide()
 }
 
 function onEscape() {
   if (!open.value) return
   hide()
-  toggle.value.focus()
+  toggle.value?.focus()
 }
 
 onBeforeUnmount(hide)

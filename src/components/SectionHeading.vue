@@ -1,9 +1,9 @@
-<script setup>
-defineProps({
-  index: { type: String, required: true },
-  kicker: { type: String, required: true },
-  title: { type: String, required: true },
-})
+<script setup lang="ts">
+defineProps<{
+  index: string
+  kicker: string
+  title: string
+}>()
 </script>
 
 <template>

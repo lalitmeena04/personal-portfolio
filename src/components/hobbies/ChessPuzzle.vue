@@ -1,6 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue'
-import { Chess } from 'chess.js'
+import { Chess, type Square } from 'chess.js'
 import { unlock } from '../../composables/useAchievements'
 
 // White to move and mate in one. Each position has exactly one mating move.
@@ -18,15 +18,15 @@ const MISS_MS = 1100
 const game = new Chess(PUZZLES[0])
 const index = ref(0)
 const board = ref(game.board())
-const selected = ref(null)
-const targets = ref([])
-const status = ref('play') // play | miss | solved
+const selected = ref<Square | null>(null)
+const targets = ref<Square[]>([])
+const status = ref<'play' | 'miss' | 'solved'>('play')
 let missTimer = 0
 
 const squares = computed(() =>
   board.value.flatMap((rank, r) =>
     rank.map((piece, f) => {
-      const name = `${FILES[f]}${8 - r}`
+      const name = `${FILES[f]}${8 - r}` as Square
       return {
         name,
         piece,
@@ -48,7 +48,7 @@ function clearSelection() {
   targets.value = []
 }
 
-function load(i) {
+function load(i: number) {
   clearTimeout(missTimer)
   index.value = i
   game.load(PUZZLES[i])
@@ -57,7 +57,7 @@ function load(i) {
   clearSelection()
 }
 
-function press(square) {
+function press(square: (typeof squares.value)[number]) {
   if (status.value !== 'play') return
 
   if (selected.value && targets.value.includes(square.name)) {
@@ -116,7 +116,12 @@ onBeforeUnmount(() => clearTimeout(missTimer))
         <span>Puzzle {{ index + 1 }} / {{ PUZZLES.length }}</span>
         {{ message }}
       </p>
-      <button v-if="status === 'solved'" type="button" class="btn btn--sm btn--primary" @click="load((index + 1) % PUZZLES.length)">
+      <button
+        v-if="status === 'solved'"
+        type="button"
+        class="btn btn--sm btn--primary"
+        @click="load((index + 1) % PUZZLES.length)"
+      >
         Next puzzle
       </button>
       <button v-else type="button" class="btn btn--sm" @click="load(index)">Reset</button>

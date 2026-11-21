@@ -1,19 +1,21 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { quests } from '../data/experience'
 import { selectedQuest } from '../store'
 import { formatDuration, monthsInclusive } from '../utils/dates'
 import SectionHeading from './SectionHeading.vue'
 
+const TAB_STEPS: Record<string, number> = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }
+
 const current = computed(() => quests.find((quest) => quest.id === selectedQuest.value) ?? quests[0])
 const duration = computed(() => formatDuration(monthsInclusive(current.value.start, current.value.end)))
 
-function select(id) {
+function select(id: string) {
   selectedQuest.value = id
 }
 
-function onTabKey(event, index) {
-  const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[event.key]
+function onTabKey(event: KeyboardEvent, index: number) {
+  const step = TAB_STEPS[event.key]
   if (!step) return
   event.preventDefault()
   const next = quests[(index + step + quests.length) % quests.length]
@@ -174,7 +176,7 @@ function onTabKey(event, index) {
   margin: 16px 0 0;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--line);
-  color: #c9d0de;
+  color: var(--text-soft);
   font-size: 1.05rem;
 }
 
@@ -205,7 +207,7 @@ function onTabKey(event, index) {
 .rank li {
   position: relative;
   padding-left: 26px;
-  color: #c9d0de;
+  color: var(--text-soft);
 }
 
 .rank li::before {

@@ -6,6 +6,7 @@ import {
   Float32BufferAttribute,
   Fog,
   Group,
+  Line,
   LineBasicMaterial,
   LineLoop,
   LineSegments,
@@ -54,25 +55,54 @@ const FOV = 55
 const WIDE_FROM = 1080
 const VIEW_SHIFT = 0.14
 
-const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
 
 // Small seeded generator so the skyline and stars look the same on every visit.
-function seeded(seed) {
+function seeded(seed: number) {
   return () => (seed = (seed * 16807) % 2147483647) / 2147483647
 }
 
-function lines(points, { color = 0xffffff, opacity = 1, fog = true, colors } = {}) {
+interface LineOptions {
+  color?: number
+  opacity?: number
+  fog?: boolean
+  /** Per-vertex RGB triples; overrides `color`. */
+  colors?: number[]
+}
+
+interface DotOptions {
+  color: number
+  size: number
+  opacity?: number
+  fog?: boolean
+  attenuate?: boolean
+}
+
+function lines(points: number[], { color = 0xffffff, opacity = 1, fog = true, colors }: LineOptions = {}) {
   const geometry = new BufferGeometry()
   geometry.setAttribute('position', new Float32BufferAttribute(points, 3))
   if (colors) geometry.setAttribute('color', new Float32BufferAttribute(colors, 3))
-  const material = new LineBasicMaterial({ color, opacity, transparent: opacity < 1, fog, vertexColors: Boolean(colors) })
+  const material = new LineBasicMaterial({
+    color,
+    opacity,
+    transparent: opacity < 1,
+    fog,
+    vertexColors: Boolean(colors),
+  })
   return new LineSegments(geometry, material)
 }
 
-function dots(points, { color, size, opacity = 1, fog = true, attenuate = true }) {
+function dots(points: number[], { color, size, opacity = 1, fog = true, attenuate = true }: DotOptions) {
   const geometry = new BufferGeometry()
   geometry.setAttribute('position', new Float32BufferAttribute(points, 3))
-  const material = new PointsMaterial({ color, size, opacity, transparent: opacity < 1, fog, sizeAttenuation: attenuate })
+  const material = new PointsMaterial({
+    color,
+    size,
+    opacity,
+    transparent: opacity < 1,
+    fog,
+    sizeAttenuation: attenuate,
+  })
   return new Points(geometry, material)
 }
 
@@ -153,8 +183,46 @@ function buildSky() {
     const left = x
     const right = x + width
     x = right + random() * 1.5
-    fill.push(left, 0, SKY_Z, right, 0, SKY_Z, right, height, SKY_Z, left, 0, SKY_Z, right, height, SKY_Z, left, height, SKY_Z)
-    outline.push(left, 0, SKY_Z, left, height, SKY_Z, left, height, SKY_Z, right, height, SKY_Z, right, height, SKY_Z, right, 0, SKY_Z)
+    fill.push(
+      left,
+      0,
+      SKY_Z,
+      right,
+      0,
+      SKY_Z,
+      right,
+      height,
+      SKY_Z,
+      left,
+      0,
+      SKY_Z,
+      right,
+      height,
+      SKY_Z,
+      left,
+      height,
+      SKY_Z,
+    )
+    outline.push(
+      left,
+      0,
+      SKY_Z,
+      left,
+      height,
+      SKY_Z,
+      left,
+      height,
+      SKY_Z,
+      right,
+      height,
+      SKY_Z,
+      right,
+      height,
+      SKY_Z,
+      right,
+      0,
+      SKY_Z,
+    )
     for (let n = 0; n < height / 3; n++) {
       windows.push(left + 0.5 + random() * (width - 1), 0.6 + random() * (height - 1.2), SKY_Z + 0.1)
     }
@@ -179,10 +247,16 @@ function buildSky() {
 function buildCar() {
   const car = new Group()
   // Offset the fill slightly so the edge lines drawn on top of it do not z-fight.
-  const body = new MeshBasicMaterial({ color: 0x0b0e15, fog: false, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 })
+  const body = new MeshBasicMaterial({
+    color: 0x0b0e15,
+    fog: false,
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1,
+  })
   const wire = new LineBasicMaterial({ color: LIME, fog: false })
 
-  const part = (width, height, depth, x, y, z) => {
+  const part = (width: number, height: number, depth: number, x: number, y: number, z: number) => {
     const geometry = new BoxGeometry(width, height, depth)
     const mesh = new Mesh(geometry, body)
     mesh.position.set(x, y, z)
@@ -203,7 +277,14 @@ function buildCar() {
 
   const glow = new Mesh(
     new PlaneGeometry(2.7, 4.7),
-    new MeshBasicMaterial({ color: LIME, transparent: true, opacity: 0.2, depthWrite: false, blending: AdditiveBlending, fog: false }),
+    new MeshBasicMaterial({
+      color: LIME,
+      transparent: true,
+      opacity: 0.2,
+      depthWrite: false,
+      blending: AdditiveBlending,
+      fog: false,
+    }),
   )
   glow.rotation.x = -Math.PI / 2
   glow.position.y = 0.02
@@ -221,12 +302,32 @@ function buildRing() {
   return ring
 }
 
+export interface DriveOptions {
+  /** Element whose size the scene follows and that pointer steering is measured against. */
+  host: HTMLElement
+  canvas: HTMLCanvasElement
+  /** HTML elements used as name tags for the pickups; one pickup can be on the road per tag. */
+  tags: HTMLElement[]
+  /** Skill names, in the order they come down the road. */
+  skills: string[]
+  speedEl: HTMLElement | null
+  onCollect: (skillIndex: number, byVisitor: boolean) => void
+  onMode: (manual: boolean) => void
+}
+
+interface Pickup {
+  gem: Mesh
+  tag: HTMLElement
+  active: boolean
+  /** Index into `skills`, or -1 while unused. */
+  skill: number
+}
+
 /**
  * Renders the night drive into `canvas`. Skills come down the road as pickups; the car grabs them on
- * autopilot until the visitor steers. `tags` are HTML elements used as name tags for the pickups on
- * the road. Returns a dispose function.
+ * autopilot until the visitor steers. Returns a dispose function.
  */
-export function createDrive({ host, canvas, tags, skills, speedEl, onCollect, onMode }) {
+export function createDrive({ host, canvas, tags, skills, speedEl, onCollect, onMode }: DriveOptions) {
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
   const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true })
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -240,7 +341,7 @@ export function createDrive({ host, canvas, tags, skills, speedEl, onCollect, on
   scene.add(...buildSky(), road.fixed, road.dashes, road.cross, road.lamps, car, ring)
 
   const gemGeometry = new OctahedronGeometry(0.5)
-  const pickups = tags.map((tag) => {
+  const pickups = tags.map((tag): Pickup => {
     const gem = new Mesh(gemGeometry, new MeshBasicMaterial({ color: LIME }))
     gem.visible = false
     scene.add(gem)
@@ -277,7 +378,7 @@ export function createDrive({ host, canvas, tags, skills, speedEl, onCollect, on
     return -1
   }
 
-  function spawn(pickup) {
+  function spawn(pickup: Pickup) {
     const skill = pickSkill()
     if (skill < 0) return false
     const lane = (lastLane + 1 + Math.floor(Math.random() * (LANES.length - 1))) % LANES.length
@@ -290,12 +391,12 @@ export function createDrive({ host, canvas, tags, skills, speedEl, onCollect, on
     return true
   }
 
-  function retire(pickup) {
+  function retire(pickup: Pickup) {
     pickup.active = false
     pickup.gem.visible = false
   }
 
-  function step(dt, now) {
+  function step(dt: number, now: number) {
     travelled += SPEED * dt
     road.dashes.position.z = travelled % DASH_PERIOD
     road.cross.position.z = travelled % GRID_PERIOD
@@ -417,7 +518,7 @@ export function createDrive({ host, canvas, tags, skills, speedEl, onCollect, on
     renderer.setAnimationLoop(run ? frame : null)
   }
 
-  function onPointer(event) {
+  function onPointer(event: PointerEvent) {
     const rect = host.getBoundingClientRect()
     if (event.clientY < rect.top || event.clientY > rect.bottom) return
     // Map the pointer to the road position underneath it at the car's depth.
@@ -426,12 +527,16 @@ export function createDrive({ host, canvas, tags, skills, speedEl, onCollect, on
     lastInput = performance.now()
   }
 
-  function onKey(event) {
+  function onKey(event: KeyboardEvent) {
     const key = event.key.toLowerCase()
     if (!['arrowleft', 'arrowright', 'a', 'd'].includes(key)) return
-    if (event.type === 'keyup') keys.delete(key)
+    if (event.type === 'keyup') {
+      keys.delete(key)
+      return
+    }
     // Leave the arrow keys alone while they are driving a tab list further down the page.
-    else if (visible && !event.target.closest?.('[role="tablist"]')) keys.add(key)
+    const inTabList = event.target instanceof Element && event.target.closest('[role="tablist"]')
+    if (visible && !inTabList) keys.add(key)
   }
 
   const clearKeys = () => keys.clear()
@@ -474,8 +579,10 @@ export function createDrive({ host, canvas, tags, skills, speedEl, onCollect, on
     window.removeEventListener('keyup', onKey)
     window.removeEventListener('blur', clearKeys)
     scene.traverse((object) => {
-      object.geometry?.dispose()
-      object.material?.dispose()
+      // Meshes, lines and points are the only objects here that own GPU resources.
+      if (!(object instanceof Mesh || object instanceof Line || object instanceof Points)) return
+      object.geometry.dispose()
+      for (const material of [object.material].flat()) material.dispose()
     })
     renderer.dispose()
   }

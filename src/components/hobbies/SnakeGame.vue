@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { unlock } from '../../composables/useAchievements'
 
@@ -19,34 +19,52 @@ const SWIPE_PX = 22
 const TROPHY_SCORE = 10
 const BEST_KEY = 'lkm:snake-best'
 
-const STEPS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }
-const OPPOSITE = { up: 'down', down: 'up', left: 'right', right: 'left' }
-const KEYS = { arrowup: 'up', w: 'up', arrowdown: 'down', s: 'down', arrowleft: 'left', a: 'left', arrowright: 'right', d: 'right' }
+type Direction = 'up' | 'down' | 'left' | 'right'
+type State = 'idle' | 'playing' | 'paused' | 'over'
 
-const canvas = ref(null)
-const state = ref('idle') // idle | playing | paused | over
+interface Cell {
+  x: number
+  y: number
+}
+
+const STEPS: Record<Direction, [dx: number, dy: number]> = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }
+const OPPOSITE: Record<Direction, Direction> = { up: 'down', down: 'up', left: 'right', right: 'left' }
+const KEYS: Record<string, Direction> = {
+  arrowup: 'up',
+  w: 'up',
+  arrowdown: 'down',
+  s: 'down',
+  arrowleft: 'left',
+  a: 'left',
+  arrowright: 'right',
+  d: 'right',
+}
+
+const canvas = ref<HTMLCanvasElement | null>(null)
+const state = ref<State>('idle')
 const score = ref(0)
 const best = ref(readBest())
 
-const overlay = computed(
-  () =>
-    ({
-      idle: { title: 'Snake', hint: 'Press Enter or tap to start' },
-      paused: { title: 'Paused', hint: 'Press Enter or tap to resume' },
-      over: { title: 'Game over', hint: `Score ${score.value}. Press Enter or tap to retry` },
-    })[state.value],
-)
+// Shown over the screen in every state except while playing.
+const overlay = computed(() => {
+  const overlays: Partial<Record<State, { title: string; hint: string }>> = {
+    idle: { title: 'Snake', hint: 'Press Enter or tap to start' },
+    paused: { title: 'Paused', hint: 'Press Enter or tap to resume' },
+    over: { title: 'Game over', hint: `Score ${score.value}. Press Enter or tap to retry` },
+  }
+  return overlays[state.value]
+})
 
-let ctx
+let ctx: CanvasRenderingContext2D | null = null
 let raf = 0
 let last = 0
 let elapsed = 0
-let snake = []
-let heading = 'right'
-let turns = []
-let food = null
-let swipeFrom = null
-let observer
+let snake: Cell[] = []
+let heading: Direction = 'right'
+let turns: Direction[] = []
+let food: Cell | null = null
+let swipeFrom: Cell | null = null
+let observer: IntersectionObserver | undefined
 
 function readBest() {
   try {
@@ -56,10 +74,10 @@ function readBest() {
   }
 }
 
-const same = (a, b) => a.x === b.x && a.y === b.y
+const same = (a: Cell, b: Cell) => a.x === b.x && a.y === b.y
 
 function placeFood() {
-  const free = []
+  const free: Cell[] = []
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
       if (!snake.some((part) => part.x === x && part.y === y)) free.push({ x, y })
@@ -104,7 +122,7 @@ function end() {
 }
 
 // Turns are queued so two quick presses within one step both register.
-function turn(direction) {
+function turn(direction: Direction) {
   if (state.value !== 'playing' || turns.length >= 2) return
   const current = turns.at(-1) ?? heading
   if (direction !== current && direction !== OPPOSITE[current]) turns.push(direction)
@@ -133,6 +151,7 @@ function step() {
 }
 
 function draw() {
+  if (!ctx) return
   ctx.fillStyle = LCD
   ctx.fillRect(0, 0, W, H)
   ctx.strokeStyle = INK
@@ -140,19 +159,24 @@ function draw() {
   ctx.strokeRect(2.5, 2.5, W - 5, H - 5)
 
   ctx.fillStyle = INK
-  snake.forEach((part, i) => {
+  for (const [i, part] of snake.entries()) {
     const inset = i === 0 ? 1 : 3
     ctx.fillRect(PAD + part.x * CELL + inset, PAD + part.y * CELL + inset, CELL - inset * 2, CELL - inset * 2)
-  })
+  }
   if (!food) return
   // Food is the original's little plus sign: four dots around an empty centre.
   const third = CELL / 3
-  for (const [cx, cy] of [[1, 0], [0, 1], [2, 1], [1, 2]]) {
+  for (const [cx, cy] of [
+    [1, 0],
+    [0, 1],
+    [2, 1],
+    [1, 2],
+  ]) {
     ctx.fillRect(PAD + food.x * CELL + cx * third + 1, PAD + food.y * CELL + cy * third + 1, third - 2, third - 2)
   }
 }
 
-function tick(now) {
+function tick(now: number) {
   const interval = Math.max(MIN_MS, START_MS - score.value * SPEEDUP_MS)
   elapsed = Math.min(elapsed + now - last, interval * 2)
   last = now
@@ -170,7 +194,7 @@ function toggle() {
   else start()
 }
 
-function onKeydown(event) {
+function onKeydown(event: KeyboardEvent) {
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()
     toggle()
@@ -183,8 +207,8 @@ function onKeydown(event) {
   turn(direction)
 }
 
-function onPointerDown(event) {
-  canvas.value.focus({ preventScroll: true })
+function onPointerDown(event: PointerEvent) {
+  canvas.value?.focus({ preventScroll: true })
   if (state.value !== 'playing') {
     toggle()
     return
@@ -192,7 +216,7 @@ function onPointerDown(event) {
   swipeFrom = { x: event.clientX, y: event.clientY }
 }
 
-function onPointerMove(event) {
+function onPointerMove(event: PointerEvent) {
   if (!swipeFrom) return
   const dx = event.clientX - swipeFrom.x
   const dy = event.clientY - swipeFrom.y
@@ -206,18 +230,20 @@ function onHidden() {
 }
 
 onMounted(() => {
+  const screen = canvas.value
+  if (!screen) return
   const dpr = Math.min(window.devicePixelRatio || 1, 2)
-  canvas.value.width = W * dpr
-  canvas.value.height = H * dpr
-  ctx = canvas.value.getContext('2d')
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  screen.width = W * dpr
+  screen.height = H * dpr
+  ctx = screen.getContext('2d')
+  ctx?.setTransform(dpr, 0, 0, dpr, 0, 0)
   draw()
 
   // Pause when the game scrolls out of view or the tab is hidden.
   observer = new IntersectionObserver(([entry]) => {
     if (!entry.isIntersecting) pause()
   })
-  observer.observe(canvas.value)
+  observer.observe(screen)
   document.addEventListener('visibilitychange', onHidden)
 })
 
@@ -249,7 +275,7 @@ onBeforeUnmount(() => {
         <span>{{ overlay.hint }}</span>
       </div>
     </div>
-    <p class="snake__help">
+    <p class="readout snake__help">
       <span>Arrow keys, WASD or swipe</span>
       <span>Space to pause</span>
       <span aria-live="polite">Score {{ score }} · Best {{ best }}</span>
@@ -311,10 +337,6 @@ onBeforeUnmount(() => {
   flex-wrap: wrap;
   gap: 4px 20px;
   margin: 12px 0 0;
-  color: var(--muted);
-  font: 500 0.8rem/1.5 var(--font-display);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .snake__help span:last-child {

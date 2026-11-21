@@ -1,14 +1,32 @@
-<script setup>
+<script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { unlock } from '../composables/useAchievements'
 import { profile } from '../data/profile'
-import AppIcon from './AppIcon.vue'
+import AppIcon, { type IconName } from './AppIcon.vue'
 import SectionHeading from './SectionHeading.vue'
+
+interface Channel {
+  id: string
+  icon: IconName
+  label: string
+  value: string
+  href: string
+  /** Text for the copy button; channels without it get no button. */
+  copy?: string
+  external?: boolean
+}
 
 const COPIED_MS = 1600
 
-const channels = [
-  { id: 'email', icon: 'mail', label: 'Email', value: profile.email, href: `mailto:${profile.email}`, copy: profile.email },
+const channels: Channel[] = [
+  {
+    id: 'email',
+    icon: 'mail',
+    label: 'Email',
+    value: profile.email,
+    href: `mailto:${profile.email}`,
+    copy: profile.email,
+  },
   {
     id: 'phone',
     icon: 'phone',
@@ -17,16 +35,24 @@ const channels = [
     href: `tel:${profile.phone.replace(/\s/g, '')}`,
     copy: profile.phone,
   },
-  { id: 'linkedin', icon: 'linkedin', label: 'LinkedIn', value: profile.linkedinHandle, href: profile.linkedin, external: true },
+  {
+    id: 'linkedin',
+    icon: 'linkedin',
+    label: 'LinkedIn',
+    value: profile.linkedinHandle,
+    href: profile.linkedin,
+    external: true,
+  },
   { id: 'github', icon: 'github', label: 'GitHub', value: profile.githubHandle, href: profile.github, external: true },
 ]
 
 const copied = ref('')
-const end = ref(null)
+const end = ref<HTMLElement | null>(null)
 let copiedTimer = 0
-let observer
+let observer: IntersectionObserver | undefined
 
-async function copy(channel) {
+async function copy(channel: Channel) {
+  if (!channel.copy) return
   try {
     await navigator.clipboard.writeText(channel.copy)
     copied.value = channel.id
@@ -38,10 +64,11 @@ async function copy(channel) {
 }
 
 onMounted(() => {
-  observer = new IntersectionObserver(([entry]) => {
+  if (!end.value) return
+  observer = new IntersectionObserver(([entry], self) => {
     if (!entry.isIntersecting) return
     unlock('credits')
-    observer.disconnect()
+    self.disconnect()
   })
   observer.observe(end.value)
 })

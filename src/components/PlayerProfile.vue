@@ -1,19 +1,14 @@
-<script setup>
+<script setup lang="ts">
 import { level, levelProgress, profile, signatureSkills } from '../data/profile'
-import { scrollToId, selectedSkill } from '../store'
+import { inspectSkill } from '../store'
 import { formatDuration, monthsInclusive } from '../utils/dates'
 import portrait from '../assets/lalit.jpg'
 import SectionHeading from './SectionHeading.vue'
 
 const experience = formatDuration(monthsInclusive(profile.careerStart) - 1)
 
-function inspect(skill) {
-  selectedSkill.value = skill.id
-  scrollToId('skills')
-}
-
-const sheet = [
-  ['Class', 'C++ / Qt Engineer'],
+const sheet: [term: string, value: string][] = [
+  ['Class', profile.playerClass],
   ['Guild', profile.company],
   ['Domain', profile.domains.join(' · ')],
   ['Region', profile.location],
@@ -55,20 +50,20 @@ const sheet = [
             <p>
               I'm a software engineer who builds high-performance, human-friendly interfaces in <strong>C++</strong> and
               <strong>Qt</strong>. I started at TATA Advanced Systems, where I rebuilt the HMI of an electronic-warfare
-              system and prototyped a 3D simulator for real-time sensor data. At Delta IoT I wrote embedded
-              display software for a global agricultural-equipment OEM.
+              system and prototyped a 3D simulator for real-time sensor data. At Delta IoT I wrote embedded display
+              software for a global agricultural-equipment OEM.
             </p>
             <p>
               Today I'm a <strong>{{ profile.role }}</strong> at <strong>{{ profile.company }}</strong> in Pune, working
-              on <strong>infrastructure engineering software</strong> and <strong>digital twins</strong>. Off the clock I
-              build my own Windows tools in Qt 6 and QML, and play a lot of video games, which is probably why I care so
-              much about how software feels in the hand.
+              on <strong>infrastructure engineering software</strong> and <strong>digital twins</strong>. Off the clock
+              I build my own Windows tools in Qt 6 and QML, and play a lot of video games, which is probably why I care
+              so much about how software feels in the hand.
             </p>
           </div>
           <p v-reveal class="pixel moves__title">Signature skills</p>
           <ul class="moves">
             <li v-for="(skill, i) in signatureSkills" :key="skill.id" v-reveal="i * 80">
-              <button type="button" class="move" :class="`move--${skill.tone}`" @click="inspect(skill)">
+              <button type="button" class="move" :class="`move--${skill.tone}`" @click="inspectSkill(skill.id)">
                 <span class="move__name">{{ skill.name }}</span>
                 <span class="move__label">{{ skill.label }}</span>
                 <span class="move__more">Open in skill tree <span aria-hidden="true">→</span></span>
@@ -184,7 +179,7 @@ const sheet = [
 .profile__bio {
   font-size: clamp(1.05rem, 1.5vw, 1.2rem);
   line-height: 1.7;
-  color: #c9d0de;
+  color: var(--text-soft);
 }
 
 .profile__bio strong {
@@ -244,7 +239,7 @@ const sheet = [
 }
 
 .move__label {
-  color: #c9d0de;
+  color: var(--text-soft);
   font-size: 0.95rem;
   line-height: 1.5;
 }

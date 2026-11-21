@@ -1,10 +1,28 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { forks as seedForks, hiddenRepos, languageColors, projects as seedProjects } from '../data/projects'
+import {
+  forks as seedForks,
+  hiddenRepos,
+  languageColors,
+  projects as seedProjects,
+  type Project,
+} from '../data/projects'
 import { profile } from '../data/profile'
 import AppIcon from './AppIcon.vue'
 import LinkMenu from './LinkMenu.vue'
 import SectionHeading from './SectionHeading.vue'
+
+/** The fields this page reads from the GitHub REST API's repository objects. */
+interface GitHubRepo {
+  name: string
+  description: string | null
+  language: string | null
+  fork: boolean
+  archived: boolean
+  stargazers_count: number
+  pushed_at: string
+  html_url: string
+}
 
 const MAX_LANGUAGES = 4
 const projects = ref(seedProjects.map((project) => ({ ...project })))
@@ -12,9 +30,9 @@ const forks = ref(seedForks)
 const live = ref(false)
 
 const monthYear = new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric' })
-const formatDate = (iso) => monthYear.format(new Date(iso))
+const formatDate = (iso: string) => monthYear.format(new Date(iso))
 
-function languageShares(languages) {
+function languageShares(languages: Project['languages']) {
   const total = languages.reduce((sum, [, bytes]) => sum + bytes, 0)
   if (!total) return []
   const shares = languages.slice(0, MAX_LANGUAGES).map(([name, bytes]) => ({ name, pct: (bytes / total) * 100 }))
@@ -23,7 +41,7 @@ function languageShares(languages) {
   return shares.map((share) => ({ ...share, color: languageColors[share.name] ?? languageColors.Other }))
 }
 
-const languageSummary = (languages) =>
+const languageSummary = (languages: Project['languages']) =>
   languageShares(languages)
     .map((share) => `${share.name} ${Math.round(share.pct)}%`)
     .join(', ')
@@ -34,7 +52,7 @@ async function refreshFromGitHub() {
     headers: { Accept: 'application/vnd.github+json' },
   })
   if (!response.ok) return
-  const repos = await response.json()
+  const repos: GitHubRepo[] = await response.json()
   const byName = new Map(repos.map((repo) => [repo.name, repo]))
 
   for (const project of projects.value) {
@@ -78,7 +96,8 @@ onMounted(() => {
     <div class="wrap">
       <SectionHeading index="04" kicker="Projects" title="Side Quests">
         What I build when nobody is assigning tickets. Pulled from
-        <a :href="profile.github" target="_blank" rel="noopener">github.com/{{ profile.githubHandle }}</a>.
+        <a :href="profile.github" target="_blank" rel="noopener">github.com/{{ profile.githubHandle }}</a
+        >.
       </SectionHeading>
 
       <p class="sync" :class="{ 'sync--live': live }">
@@ -133,7 +152,7 @@ onMounted(() => {
             </div>
             <div class="quest__links">
               <template v-for="(link, i) in project.links" :key="link.label">
-                <LinkMenu v-if="link.options" :label="link.label" :options="link.options" />
+                <LinkMenu v-if="'options' in link" :label="link.label" :options="link.options" />
                 <a
                   v-else
                   class="btn btn--sm"
@@ -269,7 +288,7 @@ onMounted(() => {
 .quest__highlights li {
   position: relative;
   padding-left: 22px;
-  color: #c9d0de;
+  color: var(--text-soft);
   font-size: 0.97rem;
   line-height: 1.55;
 }

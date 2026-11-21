@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { unlock } from '../../composables/useAchievements'
 
@@ -7,8 +7,8 @@ const GRAVITY = 1500
 const KICK = -580
 const TROPHY_TOUCHES = 10
 
-const pitch = ref(null)
-const ball = ref(null)
+const pitch = ref<HTMLElement | null>(null)
+const ball = ref<HTMLElement | null>(null)
 const touches = ref(0)
 const best = ref(0)
 const pos = reactive({ x: 0, y: 0, spin: 0 })
@@ -19,16 +19,18 @@ let vx = 0
 let vy = 0
 let raf = 0
 let last = 0
-let resizeObserver
+let resizeObserver: ResizeObserver | undefined
 
 function rest() {
+  if (!pitch.value) return
   width = pitch.value.clientWidth
   height = pitch.value.clientHeight
   pos.x = Math.min(Math.max(0, pos.x || (width - SIZE) / 2), width - SIZE)
   pos.y = height - SIZE
 }
 
-function kick(event) {
+function kick(event?: PointerEvent) {
+  if (!ball.value) return
   const rect = ball.value.getBoundingClientRect()
   // Hitting the ball off-centre sends it the other way, like a real touch.
   const offset = event?.clientX != null ? rect.left + rect.width / 2 - event.clientX : (Math.random() - 0.5) * 24
@@ -43,7 +45,7 @@ function kick(event) {
   }
 }
 
-function step(now) {
+function step(now: number) {
   const dt = Math.min(0.032, (now - last) / 1000)
   last = now
   vy += GRAVITY * dt
@@ -75,12 +77,14 @@ function step(now) {
 }
 
 onMounted(() => {
+  const el = pitch.value
+  if (!el) return
   rest()
   resizeObserver = new ResizeObserver(() => {
     if (!raf) rest()
-    else width = pitch.value.clientWidth
+    else width = el.clientWidth
   })
-  resizeObserver.observe(pitch.value)
+  resizeObserver.observe(el)
 })
 
 onBeforeUnmount(() => {
@@ -105,7 +109,7 @@ onBeforeUnmount(() => {
         <span aria-hidden="true" :style="{ transform: `rotate(${pos.spin}deg)` }">⚽</span>
       </button>
     </div>
-    <p class="keepy__score" aria-live="polite">
+    <p class="readout keepy__score" aria-live="polite">
       Touches <strong>{{ touches }}</strong> <span>Best {{ best }}</span>
     </p>
   </div>
@@ -151,10 +155,6 @@ onBeforeUnmount(() => {
   align-items: baseline;
   gap: 8px;
   margin: 12px 0 0;
-  color: var(--muted);
-  font: 500 0.8rem/1.5 var(--font-display);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .keepy__score strong {

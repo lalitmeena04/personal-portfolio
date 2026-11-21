@@ -9,7 +9,7 @@ backup/
 
 # Vite cache and temporary config files
 .vite/
-vite.config.js.timestamp-*
+vite.config.*.timestamp-*
 
 # Local environment files (commit a .env.example instead)
 .env

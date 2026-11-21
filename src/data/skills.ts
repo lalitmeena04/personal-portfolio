@@ -1,6 +1,22 @@
-const quest = (id, label) => ({ kind: 'quest', id, label })
-const project = (id, label = id) => ({ kind: 'project', id, label })
-const note = (label) => ({ kind: 'note', label })
+/** `quest` and `project` link to that card on the page; `note` is plain text. */
+export type SkillUse = { kind: 'quest' | 'project'; id: string; label: string } | { kind: 'note'; label: string }
+
+export interface Skill {
+  id: string
+  name: string
+  blurb: string
+  /** Where the skill has actually been applied; drives the "battle-tested in" links. */
+  used: SkillUse[]
+}
+
+export interface SkillGroup {
+  title: string
+  skills: Skill[]
+}
+
+const quest = (id: string, label: string): SkillUse => ({ kind: 'quest', id, label })
+const project = (id: string, label = id): SkillUse => ({ kind: 'project', id, label })
+const note = (label: string): SkillUse => ({ kind: 'note', label })
 
 const BENTLEY = quest('bentley', 'Bentley Systems')
 const DELTA = quest('delta', 'Delta IoT Solutions')
@@ -10,8 +26,7 @@ const AULA = project('AULA-F75-Studio', 'AULA F75 Studio')
 const LEET = project('leet', 'LEET')
 const SITE = note('This site')
 
-// `used` lists where each skill has actually been applied; it drives the "battle-tested in" links.
-export const skillGroups = [
+export const skillGroups: SkillGroup[] = [
   {
     title: 'Domains',
     skills: [
@@ -21,14 +36,24 @@ export const skillGroups = [
         blurb: 'My current domain at Bentley Systems.',
         used: [BENTLEY],
       },
-      { id: 'twins', name: 'Digital twins', blurb: 'My current domain, alongside infrastructure engineering software.', used: [BENTLEY] },
+      {
+        id: 'twins',
+        name: 'Digital twins',
+        blurb: 'My current domain, alongside infrastructure engineering software.',
+        used: [BENTLEY],
+      },
       {
         id: 'hmi',
         name: 'Defence HMI & simulation',
         blurb: 'Operator consoles for an electronic-warfare system and a 3D simulator for real-time sensor data.',
         used: [TASL],
       },
-      { id: 'embedded', name: 'Embedded displays', blurb: 'Display software for agricultural equipment.', used: [DELTA] },
+      {
+        id: 'embedded',
+        name: 'Embedded displays',
+        blurb: 'Display software for agricultural equipment.',
+        used: [DELTA],
+      },
     ],
   },
   {
@@ -37,7 +62,8 @@ export const skillGroups = [
       {
         id: 'cpp',
         name: 'C++',
-        blurb: 'My main. Every role so far has run on it: defence HMIs, embedded displays, and the Windows apps I build for fun.',
+        blurb:
+          'My main. Every role so far has run on it: defence HMIs, embedded displays, and the Windows apps I build for fun.',
         used: [BENTLEY, DELTA, TASL, MEDIA, AULA],
       },
       { id: 'c', name: 'C', blurb: 'Where C++ ends and the hardware begins.', used: [] },
@@ -73,7 +99,8 @@ export const skillGroups = [
       {
         id: 'three',
         name: 'Three.js',
-        blurb: 'Brought a 3D simulation scenario into a desktop application. It also draws the night drive at the top of this page.',
+        blurb:
+          'Brought a 3D simulation scenario into a desktop application. It also draws the night drive at the top of this page.',
         used: [TASL, SITE],
       },
       {
@@ -88,7 +115,12 @@ export const skillGroups = [
     title: 'Libraries & Build',
     skills: [
       { id: 'gsoap', name: 'gSOAP', blurb: 'SOAP web-service bindings for C++ systems.', used: [TASL] },
-      { id: 'opendds', name: 'OpenDDS', blurb: 'Publish–subscribe messaging for real-time data distribution.', used: [TASL] },
+      {
+        id: 'opendds',
+        name: 'OpenDDS',
+        blurb: 'Publish–subscribe messaging for real-time data distribution.',
+        used: [TASL],
+      },
       { id: 'cmake', name: 'CMake', blurb: 'Presets, Ninja and CI builds for my Qt 6 projects.', used: [MEDIA, AULA] },
     ],
   },
@@ -102,14 +134,20 @@ export const skillGroups = [
   {
     title: 'Workflow',
     skills: [
-      { id: 'git', name: 'Git', blurb: 'Everything I ship lives in a repository.', used: [BENTLEY, DELTA, TASL, MEDIA, AULA, LEET] },
+      {
+        id: 'git',
+        name: 'Git',
+        blurb: 'Everything I ship lives in a repository.',
+        used: [BENTLEY, DELTA, TASL, MEDIA, AULA, LEET],
+      },
       { id: 'bitbucket', name: 'Bitbucket', blurb: 'Team repository hosting.', used: [TASL] },
       { id: 'jenkins', name: 'Jenkins', blurb: 'CI/CD pipelines.', used: [] },
       { id: 'jira', name: 'Jira', blurb: 'Issue and sprint tracking.', used: [TASL] },
       {
         id: 'genai',
         name: 'GenAI workflows',
-        blurb: 'Used GenAI inside the development workflow to design and maintain automation scripts, for about 90% less manual effort.',
+        blurb:
+          'Used GenAI inside the development workflow to design and maintain automation scripts, for about 90% less manual effort.',
         used: [DELTA],
       },
     ],
@@ -129,7 +167,12 @@ export const skillGroups = [
   {
     title: 'Scripting',
     skills: [
-      { id: 'powershell', name: 'PowerShell', blurb: 'Build, packaging and release scripts for my Windows apps.', used: [MEDIA, AULA] },
+      {
+        id: 'powershell',
+        name: 'PowerShell',
+        blurb: 'Build, packaging and release scripts for my Windows apps.',
+        used: [MEDIA, AULA],
+      },
       { id: 'bash', name: 'Bash', blurb: 'Shell glue for builds and tooling.', used: [] },
     ],
   },
@@ -137,6 +180,27 @@ export const skillGroups = [
 
 export const allSkills = skillGroups.flatMap((group) => group.skills.map((skill) => ({ ...skill, group: group.title })))
 
+function skillById(id: string) {
+  const skill = allSkills.find((item) => item.id === id)
+  if (!skill) throw new Error(`Unknown skill id "${id}"`)
+  return skill
+}
+
 // Skills that come down the road as pickups in the hero and fill its loadout panel, in this order.
-const HERO_SKILL_IDS = ['cpp', 'qt', 'qml', 'twins', 'three', 'js', 'vue', 'unreal', 'cmake', 'git', 'powershell', 'opendds', 'gsoap', 'mysql']
-export const heroSkills = HERO_SKILL_IDS.map((id) => allSkills.find((skill) => skill.id === id))
+const HERO_SKILL_IDS = [
+  'cpp',
+  'qt',
+  'qml',
+  'twins',
+  'three',
+  'js',
+  'vue',
+  'unreal',
+  'cmake',
+  'git',
+  'powershell',
+  'opendds',
+  'gsoap',
+  'mysql',
+]
+export const heroSkills = HERO_SKILL_IDS.map(skillById)

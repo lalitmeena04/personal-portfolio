@@ -1,6 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { unlock } from '../../composables/useAchievements'
+import { holdListeners } from '../../utils/hold'
 
 // Degrees and seconds. Tuned so feathering the throttle holds the zone, and pinning it loops the bike in about 2 s.
 const LIFT = 160
@@ -23,8 +24,9 @@ let resetTimer = 0
 
 const inZone = computed(() => angle.value >= ZONE[0] && angle.value <= ZONE[1])
 const status = computed(() => (looped.value ? 'Looped out. Resetting.' : inZone.value ? 'In the balance zone.' : ''))
+const hold = holdListeners(start, stop)
 
-function step(now) {
+function step(now: number) {
   const dt = Math.min(0.032, (now - last) / 1000)
   last = now
   velocity += (throttle.value ? LIFT : -DROP) * dt
@@ -76,12 +78,6 @@ function stop() {
   throttle.value = false
 }
 
-function onKeydown(event) {
-  if (event.repeat || (event.key !== ' ' && event.key !== 'Enter')) return
-  event.preventDefault()
-  start()
-}
-
 onBeforeUnmount(() => {
   cancelAnimationFrame(raf)
   clearTimeout(resetTimer)
@@ -91,7 +87,12 @@ onBeforeUnmount(() => {
 <template>
   <div
     class="wheelie"
-    :class="{ 'is-zone': inZone, 'is-looped': looped, 'is-rolling': angle > 0 && !looped, 'is-trophy': balance >= TROPHY_SECONDS }"
+    :class="{
+      'is-zone': inZone,
+      'is-looped': looped,
+      'is-rolling': angle > 0 && !looped,
+      'is-trophy': balance >= TROPHY_SECONDS,
+    }"
     :style="{
       '--lean': Math.min(1, angle / LOOP_ANGLE),
       '--zone-start': ZONE[0] / LOOP_ANGLE,
@@ -128,24 +129,15 @@ onBeforeUnmount(() => {
       <span class="wheelie__needle"></span>
     </div>
 
-    <p class="wheelie__readout">
-      <span>Balance <strong>{{ balance.toFixed(1) }}s</strong></span>
+    <p class="readout wheelie__readout">
+      <span
+        >Balance <strong>{{ balance.toFixed(1) }}s</strong></span
+      >
       <span>Best {{ best.toFixed(1) }}s</span>
     </p>
     <p class="sr-only" aria-live="polite">{{ status }}</p>
 
-    <button
-      type="button"
-      class="btn wheelie__button"
-      @pointerdown="start"
-      @pointerup="stop"
-      @pointerleave="stop"
-      @pointercancel="stop"
-      @keydown="onKeydown"
-      @keyup="stop"
-      @blur="stop"
-      @contextmenu.prevent
-    >
+    <button type="button" class="btn wheelie__button" v-on="hold">
       {{ looped ? 'Looped it!' : 'Hold to throttle' }}
     </button>
   </div>
@@ -163,7 +155,7 @@ onBeforeUnmount(() => {
   height: 180px;
   overflow: hidden;
   border: 1px solid var(--line-2);
-  background: #0b0e15;
+  background: var(--stage);
   transition: border-color 0.15s;
 }
 
@@ -280,10 +272,6 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   align-items: baseline;
   margin: 0;
-  color: var(--muted);
-  font: 500 0.8rem/1.5 var(--font-display);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   font-variant-numeric: tabular-nums;
 }
 

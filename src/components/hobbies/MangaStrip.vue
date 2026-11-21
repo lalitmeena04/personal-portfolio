@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { unlock } from '../../composables/useAchievements'
 
@@ -41,7 +41,7 @@ function next() {
         <span v-else class="koma__number" aria-label="Unread panel">{{ i + 1 }}</span>
       </li>
     </ol>
-    <div class="manga__controls">
+    <div class="readout manga__controls">
       <button type="button" class="btn btn--sm" @click="next">
         {{ read === 0 ? 'Start reading' : read < panels.length ? 'Next panel' : 'Read again' }}
       </button>
@@ -192,9 +192,5 @@ function next() {
   align-items: center;
   gap: 8px 16px;
   margin-top: 12px;
-  color: var(--muted);
-  font: 500 0.8rem/1.5 var(--font-display);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 </style>

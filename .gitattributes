@@ -1,0 +1,7 @@
+# Check text files out with LF on every platform, so formatting checks agree between Windows and CI.
+* text=auto eol=lf
+
+*.jpg binary
+*.png binary
+*.woff binary
+*.woff2 binary

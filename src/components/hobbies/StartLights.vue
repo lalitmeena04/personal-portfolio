@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { unlock } from '../../composables/useAchievements'
 
@@ -9,7 +9,9 @@ const HOLD_MS = [900, 2600]
 const FALSE_START_MS = 100
 const TROPHY_MS = 350
 
-const LABELS = {
+type Phase = 'idle' | 'lights' | 'go' | 'done' | 'jump'
+
+const LABELS: Record<Phase, string> = {
   idle: 'Start the lights',
   lights: 'Wait for it…',
   go: 'Go!',
@@ -17,18 +19,18 @@ const LABELS = {
   jump: 'Jump start! Retry',
 }
 
-const phase = ref('idle')
+const phase = ref<Phase>('idle')
 const lit = ref(0)
-const reaction = ref(null)
-const best = ref(null)
+const reaction = ref<number | null>(null)
+const best = ref<number | null>(null)
 let timer = 0
 let goAt = 0
 
-const seconds = (ms) => `${(ms / 1000).toFixed(3)}s`
+const seconds = (ms: number) => `${(ms / 1000).toFixed(3)}s`
 const status = computed(() => {
   if (phase.value === 'go') return 'Go!'
   if (phase.value === 'jump') return 'Jump start.'
-  if (phase.value === 'done') return `Reaction time ${seconds(reaction.value)}.`
+  if (phase.value === 'done' && reaction.value != null) return `Reaction time ${seconds(reaction.value)}.`
   return ''
 })
 
@@ -83,14 +85,14 @@ function press() {
 }
 
 // React on press rather than release: a click only fires on the way up, which would add to the time.
-function onKeydown(event) {
+function onKeydown(event: KeyboardEvent) {
   if (event.key !== ' ' && event.key !== 'Enter') return
   event.preventDefault()
   if (!event.repeat) press()
 }
 
 // Pointer and keyboard presses are handled above; this catches clicks synthesised by assistive tech.
-function onClick(event) {
+function onClick(event: MouseEvent) {
   if (event.detail === 0) press()
 }
 
@@ -102,8 +104,11 @@ onBeforeUnmount(() => clearTimeout(timer))
     <ol class="lights__gantry" aria-hidden="true">
       <li v-for="n in LIGHTS" :key="n" class="lights__lamp" :class="{ 'is-on': n <= lit }"></li>
     </ol>
-    <p class="lights__readout">
-      <span>Reaction <strong>{{ phase === 'jump' ? 'Jump start' : reaction == null ? '–' : seconds(reaction) }}</strong></span>
+    <p class="readout lights__readout">
+      <span
+        >Reaction
+        <strong>{{ phase === 'jump' ? 'Jump start' : reaction == null ? '–' : seconds(reaction) }}</strong></span
+      >
       <span>Best {{ best == null ? '–' : seconds(best) }}</span>
     </p>
     <p class="sr-only" aria-live="assertive">{{ status }}</p>
@@ -134,7 +139,7 @@ onBeforeUnmount(() => clearTimeout(timer))
   height: 180px;
   padding: 0 12px;
   border: 1px solid var(--line-2);
-  background: #0b0e15;
+  background: var(--stage);
   transition: border-color 0.15s;
 }
 
@@ -166,10 +171,6 @@ onBeforeUnmount(() => clearTimeout(timer))
   align-items: baseline;
   gap: 8px;
   margin: 0;
-  color: var(--muted);
-  font: 500 0.8rem/1.5 var(--font-display);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   font-variant-numeric: tabular-nums;
 }
 

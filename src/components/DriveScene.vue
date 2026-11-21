@@ -1,30 +1,29 @@
-<script setup>
-import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, reactive, ref, type ComponentPublicInstance } from 'vue'
 import { heroSkills } from '../data/skills'
-import { scrollToId, selectedSkill } from '../store'
+import { inspectSkill } from '../store'
 import { unlock } from '../composables/useAchievements'
 
 const TAGS = 3 // pickups that can be on the road at once
 
-const stage = ref(null)
-const canvas = ref(null)
-const speed = ref(null)
-const tags = []
-const status = ref('loading') // loading | live | still | fallback
+const stage = ref<HTMLElement | null>(null)
+const canvas = ref<HTMLCanvasElement | null>(null)
+const speed = ref<HTMLElement | null>(null)
+const tags: HTMLElement[] = []
+const status = ref<'loading' | 'live' | 'still' | 'fallback'>('loading')
 const manual = ref(false)
-const collected = reactive(new Set())
-let dispose = null
+const collected = reactive(new Set<string>())
+let dispose: (() => void) | null = null
 let unmounted = false
 
-function inspect(skill) {
-  selectedSkill.value = skill.id
-  scrollToId('skills')
+function setTag(el: Element | ComponentPublicInstance | null, index: number) {
+  if (el instanceof HTMLElement) tags[index] = el
 }
 
 onMounted(async () => {
   try {
-    const { createDrive } = await import('../three/drive.js')
-    if (unmounted) return
+    const { createDrive } = await import('../three/drive')
+    if (unmounted || !stage.value || !canvas.value) return
     dispose = createDrive({
       host: stage.value,
       canvas: canvas.value,
@@ -55,7 +54,7 @@ onBeforeUnmount(() => {
     <div ref="stage" class="drive__stage">
       <canvas ref="canvas" aria-hidden="true"></canvas>
       <div class="drive__scrim" aria-hidden="true"></div>
-      <span v-for="n in TAGS" :key="n" :ref="(el) => (tags[n - 1] = el)" class="drive__tag" aria-hidden="true"></span>
+      <span v-for="n in TAGS" :key="n" :ref="(el) => setTag(el, n - 1)" class="drive__tag" aria-hidden="true"></span>
       <p v-show="status === 'live'" class="drive__status">
         <span>
           <b aria-hidden="true">◉</b> {{ manual ? "You're driving" : 'Autopilot' }}
@@ -72,7 +71,12 @@ onBeforeUnmount(() => {
       </p>
       <ul>
         <li v-for="skill in heroSkills" :key="skill.id">
-          <button type="button" class="drive__skill" :class="{ 'is-collected': collected.has(skill.id) }" @click="inspect(skill)">
+          <button
+            type="button"
+            class="drive__skill"
+            :class="{ 'is-collected': collected.has(skill.id) }"
+            @click="inspectSkill(skill.id)"
+          >
             {{ skill.name }}
           </button>
         </li>
