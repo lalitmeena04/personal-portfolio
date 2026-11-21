@@ -71,7 +71,7 @@ export const quests: [Quest, ...Quest[]] = [
     start: '2021-10',
     end: '2025-02',
     period: 'Oct 2021 – Feb 2025',
-    brief: 'Defence HMIs and simulation. Four performance-based promotions in 3.5 years.',
+    brief: 'Defence HMIs and simulation. Two performance-based promotions in 3.5 years.',
     ranks: [
       {
         title: 'Senior Executive',

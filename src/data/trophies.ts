@@ -20,9 +20,9 @@ export const trophies: Trophy[] = [
   },
   {
     tier: 'gold',
-    title: 'Rank Up ×4',
+    title: 'Rank Up ×2',
     source: 'TATA Advanced Systems · 2021 – 2025',
-    detail: 'Four performance-based promotions in 3.5 years.',
+    detail: 'Two performance-based promotions in 3.5 years.',
   },
   {
     tier: 'silver',
